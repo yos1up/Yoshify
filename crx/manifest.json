@@ -1,0 +1,24 @@
+{
+    "name": "Yoshify",
+    "short_name": "Yoshify",
+    "description" : "Call Yoshi from anywhere",
+    "version": "0.0.1",
+    "manifest_version": 2,
+    "icons": {
+    },
+    "browser_action": {
+      "default_popup": "popup.html",
+      "default_icon": "777131.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://www.youtube.com/*"],
+            "js": ["main.js"]
+        }
+    ],
+    "web_accessible_resources": [
+       "*.wav",
+       "my-processor.js"
+    ]
+}
+
