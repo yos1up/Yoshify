@@ -1,6 +1,17 @@
-
-
 const USE_AUDIOWORKLET = true
+
+const rhythmPattern = [
+    {"inst": "low", "pos": 0},
+    {"inst": "high", "pos": 0.5},
+    {"inst": "high", "pos": 0.76},
+]
+
+let playMetronome = false
+chrome.extension.onRequest.addListener (
+    function(request, sender, sendResponse) {
+        playMetronome = !playMetronome
+    }
+)
 
 
 function argmax(ary){
@@ -44,8 +55,9 @@ function loadSound(url, name) {
     }
     request.send()
 }
-// loadSound("http://commons.nicovideo.jp/api/preview/get?cid=104869", "tick")
-loadSound(chrome.extension.getURL("metronome.wav"), "tick")
+loadSound(chrome.extension.getURL("sounds/low.wav"), "low")
+loadSound(chrome.extension.getURL("sounds/high.wav"), "high")
+
 
 function playSound(buffer, when) {
     /* デコード済音声バイナリデータ buffer を when[sec]（AudioContextのcurrentTimeなどで扱われる絶対時間）に再生する */
@@ -111,31 +123,6 @@ if (vs.length > 0){
         track.connect(spn)
         spn.connect(audioContext.destination)
     }else{
-        /*
-        const processorSource = `
-            class MyProcessor extends AudioWorkletProcessor {
-                constructor() {
-                    super();
-                }
-                process(inputs, outputs, parameters) {
-                    // let input = inputs[0];
-                    // let output = outputs[0];
-                    // for (let channel = 0; channel < input.length; ++channel) {
-                    //     let inputChannel = input[channel];
-                    //     let outputChannel = output[channel];
-                    //     for (let i = 0; i < inputChannel.length; ++i) outputChannel[i] = inputChannel[i]
-                    // }
-                    if (Math.random() < 0.01) console.log(":)")
-                    return true;
-                }
-            }
-            registerProcessor('my-processor', MyProcessor);
-        `        
-        // addModule できるのはローカルファイルではだめでサーバーからの提供である必要があるらしいので Blob を生成する
-        // 参考：https://stackoverflow.com/questions/52760219/use-audioworklet-within-electron-domexception-the-user-aborted-a-request
-        const processorBlob = new Blob([processorSource], { type: 'text/javascript' });
-        const processorPath = URL.createObjectURL(processorBlob);
-        */
         const processorPath = chrome.extension.getURL("my-processor.js")
         audioContext.audioWorklet.addModule(processorPath).then(() => {
             const awn = new AudioWorkletNode(audioContext, "my-processor")
@@ -143,36 +130,57 @@ if (vs.length > 0){
             // awn は destination に繋がなくても動作してくれるようだ．素敵．
             track.connect(audioContext.destination)
 
-            setInterval(()=>{
-                awn.port.postMessage({})
-            }, 3000)
+            awn.port.onmessage = (e) => {
+                const {wave, waveSampleRate, waveFinishedAt} = e.data
+                // const waveBuffer = e.data
+                // const wave = waveBuffer.slice()
+                /*
+                const waveFinishedAt = waveBuffer.updatedAt
+                waveBuffer.slice = RingBuffer.prototype.slice
+                const wave = waveBuffer.slice()
+                */
+                console.log("computeBPM2 evoked")
+                computeBPM2(wave, waveSampleRate, waveFinishedAt)
+            }
         })
     }
 }
 
-
-function computeBPM(){
-    const wave = waveBuffer.slice()
-    const waveFinishedAt = waveBuffer.updatedAt
+function computeBPM2(wave, waveSampleRate, waveFinishedAt){
     if (wave.length === 0 || wave.reduce((x,y)=>x+y) === 0){
         estimationResult.bpm = null
         estimationResult.beatReferenceTime = null
         return null
     }
-    worker.postMessage({audioContextSampleRate, wave, waveFinishedAt}) // WebWorker に移動したおかげで FFT が原因でメインスレッドの処理落ちすることはなくなった
+    worker.postMessage({wave, waveSampleRate, waveFinishedAt}) // WebWorker に移動したおかげで FFT が原因でメインスレッドの処理落ちすることはなくなった
 }
 
-console.log("start computing BPM")
-setInterval(computeBPM, 4000)
+if (!USE_AUDIOWORKLET){
+    function computeBPM(){
+        const wave = waveBuffer.slice()
+        const waveSampleRate = audioContextSampleRate
+        const waveFinishedAt = waveBuffer.updatedAt
+        if (wave.length === 0 || wave.reduce((x,y)=>x+y) === 0){
+            estimationResult.bpm = null
+            estimationResult.beatReferenceTime = null
+            return null
+        }
+        worker.postMessage({wave, waveSampleRate, waveFinishedAt}) // WebWorker に移動したおかげで FFT が原因でメインスレッドの処理落ちすることはなくなった
+    }
+
+    console.log("start computing BPM")
+    setInterval(computeBPM, 4000)
+}
 
 
 const workerJS = `
     function computeBPM(data){
-        const {audioContextSampleRate, wave, waveFinishedAt} = data
+        const {waveSampleRate, wave, waveFinishedAt} = data
         // 1. STFTする
         // 2. 発音タイミングを抽出する
         // 3. その時間挙動を FFT する
-        const binSample = 1024
+        const targetWindowSecondOfSTFT = 0.025
+        const binSample = findNearestPowerOf2(waveSampleRate * targetWindowSecondOfSTFT)
         const stfts = []
         for(let i=0;i<wave.length;i+=binSample){
             let wavelet = wave.slice(i, i + binSample)
@@ -181,14 +189,16 @@ const workerJS = `
         }
         // 2
         const lpFreq = 200, hpFreq = 50000 // 低音域と高音域だけあてにする
-        const filteredIndices = [...Array(binSample).keys()].filter(i => i/binSample * audioContextSampleRate < lpFreq || hpFreq < i/binSample * audioContextSampleRate)
+        const filteredIndices = [...Array(binSample).keys()].filter(i => i/binSample * waveSampleRate < lpFreq || hpFreq < i/binSample * waveSampleRate)
         const onSignal = [...Array(stfts.length - 1).keys()].map(i => filteredIndices.map(j => Math.max(stfts[i+1][j] - stfts[i][j], 0)).reduce((x,y) => x + y))
-        const onSignalSamplingRate = audioContextSampleRate / binSample
+        const onSignalSamplingRate = waveSampleRate / binSample
         // 3
-        const onSignalPadded = padZero(onSignal, 32768)
+        const targetBPMResolution = 0.1 // BPM の目標解像度（indexToBPMCoeff がこれくらいの値になって欲しい） 
+        const onSignalPaddedLength = findNearestPowerOf2(60 * waveSampleRate / binSample / targetBPMResolution)
+        const onSignalPadded = padZero(onSignal, onSignalPaddedLength)
         const onSpect = fft1(onSignalPadded)
         const onPowerSpect = getPower(onSpect)
-        const indexToBPMCoeff = 60 * audioContextSampleRate / onSignalPadded.length / binSample
+        const indexToBPMCoeff = 60 * waveSampleRate / onSignalPadded.length / binSample
 
         const peakIndex = findPeak(onPowerSpect, Math.floor(50 / indexToBPMCoeff), Math.ceil(200 / indexToBPMCoeff))
         const bpmCandidates = peakIndex.map(i => ({
@@ -196,6 +206,9 @@ const workerJS = `
             "peakValue": onPowerSpect[i],
             "curvature": onPowerSpect[i] - 0.5 * (onPowerSpect[i-1] + onPowerSpect[i+1])
         }))
+
+        console.log({binSample, onSignalPaddedLength})
+
         return {bpmCandidates, onSignal, onSignalSamplingRate, waveFinishedAt, onPowerSpect, wave}
     }
 
@@ -266,6 +279,10 @@ const workerJS = `
     }
     // ====================== FFT ======================
 
+    function findNearestPowerOf2(x){
+        return 1 << Math.round(Math.log2(x))
+    }
+
     onmessage = function(e) {postMessage(computeBPM(e.data))}
 `
 
@@ -299,25 +316,28 @@ worker.onmessage = function (e){
 // メトロノーム用
 let lastScheduledTime = null
 function setMetronomeSchedule(){
-    // 400ms 先までのメトロノームを登録する
-    const {bpm, beatReferenceTime} = estimationResult
-    if (bpm === null) return
-    if (beatReferenceTime === null) return
-    const beatIntervalTime = 60 / bpm
-    // audioContext.currentTime 以降 400ms の間で，beatReferenceTime + i * beatIntervalTime と表されるもののうち
-    // lastScheduledTime 以降であるものを登録する．
-    const currentTime = audioContext.currentTime
-    const seq = generateTrimmedArithmeticSequence(
-        beatReferenceTime,
-        beatIntervalTime,
-        currentTime,
-        currentTime + 0.4
-    ).filter(_ => (lastScheduledTime === null) || (lastScheduledTime + 0.2 < _))
-    for (let s of seq){
-        playSound(soundBuffers.tick, s)
-        // TODO: 周辺の 0.15 はヒューリスティックに入れた調整
+    if (playMetronome){
+        const {bpm, beatReferenceTime} = estimationResult
+        if (bpm === null || beatReferenceTime === null){
+            return
+        }
+        const beatIntervalTime = 60 / bpm
+        // audioContext.currentTime 以降 400ms の間で，beatReferenceTime + i * beatIntervalTime と表されるもののうち
+        // lastScheduledTime 以降であるものを登録する．
+        const currentTime = audioContext.currentTime
+        const seq = generateTrimmedArithmeticSequence(
+            beatReferenceTime,
+            beatIntervalTime,
+            currentTime,
+            currentTime + 0.4 // 0.4 秒未来までのメトロノームを登録する
+        ).filter(_ => (lastScheduledTime === null) || (lastScheduledTime + 0.2 < _))
+        for (let s of seq){
+            for (let note of rhythmPattern){
+                playSound(soundBuffers[note.inst], s + note.pos * beatIntervalTime)
+            }
+        }
+        if (seq.length > 0) lastScheduledTime = Math.max(...seq)
     }
-    if (seq.length > 0) lastScheduledTime = Math.max(...seq)
 }
 setInterval(setMetronomeSchedule, 250)
 
