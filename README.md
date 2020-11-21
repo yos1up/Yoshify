@@ -3,6 +3,6 @@
 Call Yoshi from anywhere
 
 
-# Contact
+## Contact
 
 [@yos1up](https://twitter.com/yos1up)
