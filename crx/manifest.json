@@ -8,21 +8,20 @@
     },
     "browser_action": {
       "default_title": "Yoshify",
-      "default_icon": "images/icon.png"
+      "default_icon": "images/icon_off.png"
     },
     "content_scripts": [
         {
             "matches": ["https://www.youtube.com/*"],
-            "js": ["main.js"]
+            "js": ["src/main.js"]
         }
     ],
     "web_accessible_resources": [
        "sounds/*.wav",
-       "my-processor.js",
-       "worker.js"
+       "src/my-processor.js"
     ],
     "background": {
-        "scripts": ["background.js"],
+        "scripts": ["src/background.js"],
         "persistent": true
     }    
 }

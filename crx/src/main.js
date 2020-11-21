@@ -9,7 +9,8 @@ const rhythmPattern = [
 let playMetronome = false
 chrome.extension.onRequest.addListener (
     function(request, sender, sendResponse) {
-        playMetronome = !playMetronome
+        playMetronome = request.isActive
+        if (playMetronome) playSound(soundBuffers.yoshi)
     }
 )
 
@@ -55,14 +56,21 @@ function loadSound(url, name) {
     }
     request.send()
 }
-loadSound(chrome.extension.getURL("sounds/low.wav"), "low")
-loadSound(chrome.extension.getURL("sounds/high.wav"), "high")
+loadSound(chrome.extension.getURL("../sounds/bongo_low.wav"), "low")
+loadSound(chrome.extension.getURL("../sounds/bongo_high.wav"), "high")
+loadSound(chrome.extension.getURL("../sounds/yoshi.wav"), "yoshi")
 
 
 function playSound(buffer, when) {
     /* デコード済音声バイナリデータ buffer を when[sec]（AudioContextのcurrentTimeなどで扱われる絶対時間）に再生する */
     let source = audioContext.createBufferSource()
     source.buffer = buffer
+    let gainNode = audioContext.createGain()
+    /*
+    source.connect(gainNode)
+    gainNode.connect(audioContext.destination)   
+    gainNode.gain.value = 0.5
+    */
     source.connect(audioContext.destination)
     source.start(when)
 }
@@ -123,7 +131,7 @@ if (vs.length > 0){
         track.connect(spn)
         spn.connect(audioContext.destination)
     }else{
-        const processorPath = chrome.extension.getURL("my-processor.js")
+        const processorPath = chrome.extension.getURL("src/my-processor.js")
         audioContext.audioWorklet.addModule(processorPath).then(() => {
             const awn = new AudioWorkletNode(audioContext, "my-processor")
             track.connect(awn)
@@ -139,7 +147,6 @@ if (vs.length > 0){
                 waveBuffer.slice = RingBuffer.prototype.slice
                 const wave = waveBuffer.slice()
                 */
-                console.log("computeBPM2 evoked")
                 computeBPM2(wave, waveSampleRate, waveFinishedAt)
             }
         })
@@ -150,6 +157,7 @@ function computeBPM2(wave, waveSampleRate, waveFinishedAt){
     if (wave.length === 0 || wave.reduce((x,y)=>x+y) === 0){
         estimationResult.bpm = null
         estimationResult.beatReferenceTime = null
+        estimationResult.bpmHistory.push(null)
         return null
     }
     worker.postMessage({wave, waveSampleRate, waveFinishedAt}) // WebWorker に移動したおかげで FFT が原因でメインスレッドの処理落ちすることはなくなった
@@ -163,6 +171,7 @@ if (!USE_AUDIOWORKLET){
         if (wave.length === 0 || wave.reduce((x,y)=>x+y) === 0){
             estimationResult.bpm = null
             estimationResult.beatReferenceTime = null
+            estimationResult.bpmHistory.push(null)
             return null
         }
         worker.postMessage({wave, waveSampleRate, waveFinishedAt}) // WebWorker に移動したおかげで FFT が原因でメインスレッドの処理落ちすることはなくなった
@@ -174,6 +183,7 @@ if (!USE_AUDIOWORKLET){
 
 
 const workerJS = `
+    let showDebugInfo = true
     function computeBPM(data){
         const {waveSampleRate, wave, waveFinishedAt} = data
         // 1. STFTする
@@ -182,15 +192,19 @@ const workerJS = `
         const targetWindowSecondOfSTFT = 0.025
         const binSample = findNearestPowerOf2(waveSampleRate * targetWindowSecondOfSTFT)
         const stfts = []
+        // i ステップ目で，元の wave の [i * binSample - binSample/2, i * binSample + binSample/2) サンプルを
+        // FFT にかけたい．
+        const wavePadded = Array(binSample/2).fill(0).concat(wave).concat(Array(binSample/2).fill(0))
         for(let i=0;i<wave.length;i+=binSample){
-            let wavelet = wave.slice(i, i + binSample)
-            wavelet = padZero(wavelet, binSample)
+            let wavelet = wavePadded.slice(i, i + binSample)
+            // wavelet = padZero(wavelet, binSample)
             stfts.push(getPower(fft1(wavelet)))
         }
         // 2
-        const lpFreq = 200, hpFreq = 50000 // 低音域と高音域だけあてにする
+        const lpFreq = 300, hpFreq = 50000 // 低音域と高音域だけあてにする
         const filteredIndices = [...Array(binSample).keys()].filter(i => i/binSample * waveSampleRate < lpFreq || hpFreq < i/binSample * waveSampleRate)
-        const onSignal = [...Array(stfts.length - 1).keys()].map(i => filteredIndices.map(j => Math.max(stfts[i+1][j] - stfts[i][j], 0)).reduce((x,y) => x + y))
+        let onSignal = [...Array(stfts.length - 1).keys()].map(i => filteredIndices.map(j => Math.max(stfts[i+1][j] - stfts[i][j], 0)).reduce((x,y) => x + y))
+        // onSignal = onSignal.map(Math.log1p) // TODO: log1pは妥当か？
         const onSignalSamplingRate = waveSampleRate / binSample
         // 3
         const targetBPMResolution = 0.1 // BPM の目標解像度（indexToBPMCoeff がこれくらいの値になって欲しい） 
@@ -200,16 +214,18 @@ const workerJS = `
         const onPowerSpect = getPower(onSpect)
         const indexToBPMCoeff = 60 * waveSampleRate / onSignalPadded.length / binSample
 
-        const peakIndex = findPeak(onPowerSpect, Math.floor(50 / indexToBPMCoeff), Math.ceil(200 / indexToBPMCoeff))
+        if (showDebugInfo){
+            console.log({binSample, onSignalPaddedLength})
+            showDebugInfo = false
+        }
+
+        const peakIndex = findPeak(onPowerSpect, Math.floor(84.5 / indexToBPMCoeff), Math.ceil(200.5 / indexToBPMCoeff))
         const bpmCandidates = peakIndex.map(i => ({
             "BPM": indexToBPMCoeff * i,
             "peakValue": onPowerSpect[i],
             "curvature": onPowerSpect[i] - 0.5 * (onPowerSpect[i-1] + onPowerSpect[i+1])
         }))
-
-        console.log({binSample, onSignalPaddedLength})
-
-        return {bpmCandidates, onSignal, onSignalSamplingRate, waveFinishedAt, onPowerSpect, wave}
+        return {bpmCandidates, onSignal, onSignalSamplingRate, waveFinishedAt, onPowerSpect, wave, waveSampleRate, stfts}
     }
 
     function findPeak(ary, start, end){
@@ -288,28 +304,41 @@ const workerJS = `
 
 let estimationResult = {
     "bpm": null,
-    "beatReferenceTime": null
+    "beatReferenceTime": null,
+    "bpmHistory": []
 }
 
-const worker = new Worker(createURLFromText(workerJS))
+let worker = new Worker(createURLFromText(workerJS))
+let debugKey = localStorage.save
 worker.onmessage = function (e){
-    const {bpmCandidates, onSignal, onSignalSamplingRate, waveFinishedAt, onPowerSpect, wave} = e.data
+    const {bpmCandidates, onSignal, onSignalSamplingRate, waveFinishedAt, onPowerSpect, wave, waveSampleRate, stfts} = e.data
     if (bpmCandidates.length > 0) {
         const argmaxi = argmax(bpmCandidates.map(_ => _.peakValue))
         const bpm = bpmCandidates[argmaxi].BPM
         console.log("estimated BPM: " + bpm)
-        // const argmaxi2 = argmax(bpmCandidates.map(_ => _.curvature/_.peakValue))
-        // console.log(bpmCandidates[argmaxi2].BPM)
+
 
         //拍タイミング推定
         const peakOffset = findPeakOffset(onSignal, onSignalSamplingRate * 60 / bpm)
-        const beatReferenceTime = waveFinishedAt - (onSignal.length - peakOffset) / onSignalSamplingRate
+        const waveStartedAt = waveFinishedAt - wave.length / waveSampleRate
+        // const beatReferenceTime = waveFinishedAt - (onSignal.length - peakOffset) / onSignalSamplingRate
+        const beatReferenceTime = waveStartedAt + peakOffset / onSignalSamplingRate
 
         estimationResult.bpm = bpm
         estimationResult.beatReferenceTime = beatReferenceTime
+        estimationResult.bpmHistory.push(bpm)
+        const num = 11
+        console.log(`(median of last ${num} trials: ${getMedian(estimationResult.bpmHistory.slice(-num))})`)
 
-        // autoDownload("onPowerSpect.txt", String(onPowerSpect))
-        // autoDownload("wave.txt", String(wave))
+        // デバッグ用
+        if (localStorage.save != debugKey){
+            debugKey = localStorage.save
+            autoDownload("snapshot.txt", JSON.stringify({
+                bpmCandidates, onSignal, onSignalSamplingRate, waveFinishedAt, onPowerSpect, wave,
+                bpm, peakOffset, beatReferenceTime, 
+                waveSampleRate, stfts
+            }))
+        }
     }
 }
 
@@ -389,3 +418,20 @@ function range(s, e){
     if (s >= e) return []
     return [...Array(e - s).keys()].map(_ => s + _)
 }
+
+function getMedian(ary){
+    const sorted = ary.filter(_ => typeof _ === "number").sort()
+    if (sorted.length === 0) return null
+    const len = sorted.length
+    if (len % 2){
+        return sorted[(len - 1)/ 2]
+    } else {
+        return (sorted[len / 2 - 1] + sorted[len / 2]) / 2
+    }
+}
+
+
+
+
+
+

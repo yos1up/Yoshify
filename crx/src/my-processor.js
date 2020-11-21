@@ -1,20 +1,13 @@
+const DOWNSAMPLING = 4 // 1 がダウンサンプリングなし．128 以下の2ベキである必要がある．
+
 class MyProcessor extends AudioWorkletProcessor {
     constructor() {
         super()
-        this.waveBuffer = new RingBuffer(sampleRate * 5)
+        this.waveBuffer = new RingBuffer(Math.round(sampleRate / DOWNSAMPLING * 5)) // 5秒ぶん
         this.estimationResult = {
             "bpm": null,
             "beatReferenceTime": null
         }
-        /*
-        this.port.onmessage = ((e)=>{
-            // this.port.postMessage(this.computeBPM())
-            this.port.postMessage({
-                "wave": this.waveBuffer.slice(),
-                "waveFinishedAt": this.waveBuffer.updatedAt
-            })
-        }).bind(this)
-        */
         this.callCnt = 0
     }
 
@@ -24,9 +17,8 @@ class MyProcessor extends AudioWorkletProcessor {
             const message = {
                 "wave": this.waveBuffer.slice(),
                 "waveFinishedAt": this.waveBuffer.updatedAt,
-                "waveSampleRate": sampleRate
+                "waveSampleRate": sampleRate / DOWNSAMPLING
             }
-            console.log(message.wave.length)
             this.port.postMessage(message)
             // TODO このメッセージを送信した瞬間一瞬ラグるのの抑止
             // この行を postMessage({}) にするとラグらないので
@@ -34,8 +26,10 @@ class MyProcessor extends AudioWorkletProcessor {
             // → 220500サンプルだとラグるけど45000サンプル程度だとラグらないらしいので
             // wave の samplingRate を下げて対応？
         }
-        for (let i = 0; i < inputs[0][0].length; ++i) this.waveBuffer.push(inputs[0][0][i])
-        this.waveBuffer.updatedAt = currentTime
+        if (inputs[0][0]){
+            for (let i = 0; i < inputs[0][0].length; i+=DOWNSAMPLING) this.waveBuffer.push(inputs[0][0][i])
+            this.waveBuffer.updatedAt = currentTime
+        }
         return true
     }
  
