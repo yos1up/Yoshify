@@ -1,6 +1,8 @@
 # Yoshify
 
-Ride Yoshi whenever you want
+Ride Yoshi whenever you want. 
+
+When turned on, it attempts to play Yoshi bongos in sync with the music in your browser. At the moment it works best with music that has a regular beat, such as EDM music.
 
 ## Installation
 This "Yoshify" is provided as an unpacked Chrome extension. You can install it into your Chrome [like this way](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/).
