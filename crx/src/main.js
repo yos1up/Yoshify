@@ -11,6 +11,8 @@ chrome.extension.onRequest.addListener (
     function(request, sender, sendResponse) {
         playMetronome = request.isActive
         if (playMetronome) playSound(soundBuffers.yoshi)
+        sendResponse({})
+        return true
     }
 )
 
