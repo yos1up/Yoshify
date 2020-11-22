@@ -19,7 +19,7 @@ This "Yoshify" is provided as an unpacked Chrome extension. You can install it i
 
 - 他の音声系の拡張機能が Chrome に入っている場合は，正常に動作しない場合がありますので，それらの拡張機能オフにして試してみてください．その際，新規にタブを開き，そのタブで動画再生ページにアクセスし直した上で，拡張機能のアイコンをいったんオフに切り替えてから再度オンにしてみてください．
 
-- Chrome が最新版ではない場合は，最新版にアップデートしてみてください．
+- Chrome が最新版ではない場合は，最新版にアップデートしてみてください． (If your Chrome is not the latest version, try updating to the latest version.)
 
 ## Contact
 
