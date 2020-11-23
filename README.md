@@ -17,9 +17,9 @@ This "Yoshify" is provided as an unpacked Chrome extension. You can install it i
 
 ## うまく動かないときは
 
-- アイコンがオンの状態になっているにもかかわらずボンゴが聞こえない場合は，アイコンをいったんオフに切り替えてから再度オンに切り替えると，ボンゴが鳴り始めることがあります． (If you don't hear the bongos even though the icon is on, switch it off and then turn on again, then the bongos may start to sound. )
+- 他の拡張機能が Chrome に入っている場合は，正常に動作しない場合があります．（例えば，広告ブロッカーがオンになっていると正常に動作しないそうです．）対処法としては，正常に動作しない原因になっていそうな拡張機能をオフにして試してみてください．その際，新規にタブを開き，そのタブで動画再生ページにアクセスし直した上で，ヨッシーのアイコンをいったんオフに切り替えてから再度オンにしてみてください．
 
-- 他の音声系の拡張機能が Chrome に入っている場合は，正常に動作しない場合がありますので，それらの拡張機能オフにして試してみてください．その際，新規にタブを開き，そのタブで動画再生ページにアクセスし直した上で，拡張機能のアイコンをいったんオフに切り替えてから再度オンにしてみてください．
+- ヨッシーのアイコンがオンの状態になっているにもかかわらずボンゴが聞こえない場合は，アイコンをいったんオフに切り替えてから再度オンに切り替えると，ボンゴが鳴り始めることがあります． (If you don't hear the bongos even though the icon is on, switch it off and then turn on again, then the bongos may start to sound. )
 
 - Chrome が最新版ではない場合は，最新版にアップデートしてみてください． (If your Chrome is not the latest version, try updating to the latest version.)
 
