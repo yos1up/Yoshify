@@ -29,6 +29,6 @@ Yoshify は「パッケージ化されていないChrome拡張」として提供
 
 - Chrome が最新版ではない場合は，最新版にアップデートしてみてください． (If your Chrome is not the latest version, try updating to the latest version.)
 
-## Contact
+## 連絡先 (Contact)
 
 [@yos1up](https://twitter.com/yos1up)
