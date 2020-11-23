@@ -1,10 +1,10 @@
 # Yoshify
 
-<blockquote class="twitter-tweet"><p lang="ja" dir="ltr">ヨッシー30周年というわけで「いつでもヨッシーを呼び出せるChrome拡張」を作りました！！！ <a href="https://twitter.com/hashtag/%E3%83%A8%E3%83%83%E3%82%B7%E3%83%BC?src=hash&amp;ref_src=twsrc%5Etfw">#ヨッシー</a> <a href="https://twitter.com/hashtag/%E3%83%A8%E3%83%83%E3%82%B7%E3%83%BC30%E5%91%A8%E5%B9%B4?src=hash&amp;ref_src=twsrc%5Etfw">#ヨッシー30周年</a> <a href="https://twitter.com/hashtag/%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%E3%83%95%E3%82%A1%E3%83%9F%E3%82%B3%E3%83%B330%E5%91%A8%E5%B9%B4?src=hash&amp;ref_src=twsrc%5Etfw">#スーパーファミコン30周年</a> <a href="https://t.co/VydZ6S1uQ4">pic.twitter.com/VydZ6S1uQ4</a></p>&mdash; Yuki Yoshida (@yos1up) <a href="https://twitter.com/yos1up/status/1330063716956647424?ref_src=twsrc%5Etfw">November 21, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+いつでもヨッシーに乗れるようになるChrome拡張
 
 Ride Yoshi whenever you want. 
 
-いつでもヨッシーに乗れるようになるChrome拡張
+https://twitter.com/yos1up/status/1330063716956647424?s=20
 
 
 ## About
