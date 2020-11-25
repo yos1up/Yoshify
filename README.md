@@ -8,7 +8,9 @@ https://twitter.com/yos1up/status/1330063716956647424?s=20
 
 
 ## About
-When turned on, it attempts to play Yoshi bongos in sync with the music in your browser. At the moment it works best with music that has a regular beat, such as EDM music.
+
+「スーパーマリオシリーズでマリオがヨッシーに乗ると BGM の裏で鳴り始めるボンゴパート」をワンクリックで好きな曲に追加できる Chrome 拡張です．
+(When turned on, it attempts to play Yoshi bongos in sync with the music in your browser. At the moment it works best with music that has a regular beat, such as EDM music.)
 
 ## インストール方法 (Installation)
 Yoshify は「パッケージ化されていないChrome拡張」として提供されています． お手元のChromeには，[この手順](http://reviews.f-tools.net/Add-On/Jisaku-Tuika.html)でインストールできます． (This "Yoshify" is provided as an unpacked Chrome extension. You can install it into your Chrome [like this way](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/).)
