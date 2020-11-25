@@ -7,7 +7,7 @@ Ride Yoshi whenever you want.
 https://twitter.com/yos1up/status/1330063716956647424?s=20
 
 
-## About
+## これはなに (About)
 
 「スーパーマリオシリーズでマリオがヨッシーに乗ると BGM の裏で鳴り始めるボンゴパート」をワンクリックで好きな曲に追加できる Chrome 拡張です．
 (When turned on, it attempts to play Yoshi bongos in sync with the music in your browser. At the moment it works best with music that has a regular beat, such as EDM music.)
