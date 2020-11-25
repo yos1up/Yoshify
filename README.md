@@ -25,6 +25,8 @@ Yoshify は「パッケージ化されていないChrome拡張」として提供
 
 ## うまく動かないときは (Troubleshooting)
 
+- ページを再読み込みすると，正常に動作するようになる場合があります． (Reloading the page may be useful.)
+
 - 他の拡張機能が Chrome に入っている場合は，正常に動作しない場合があります．（例えば，広告ブロッカーがオンになっていると正常に動作しないそうです．）対処法としては，正常に動作しない原因になっていそうな拡張機能をオフにして試してみてください．その際，新規にタブを開き，そのタブで動画再生ページにアクセスし直した上で，ヨッシーのアイコンをいったんオフに切り替えてから再度オンにしてみてください． (If other Chrome extensions are working, Yoshify may not work properly. (For example, I heard it doesn't work when an ad-blocker is working). Please turn off extensions that may be causing the problem. Then, open a new tab, load a YouTube page in the tab, switch the Yoshi icon off and then switch on again.)
 
 - ヨッシーのアイコンがオンの状態になっているにもかかわらずボンゴが聞こえない場合は，アイコンをいったんオフに切り替えてから再度オンに切り替えると，ボンゴが鳴り始めることがあります． (If you don't hear the bongos even though the icon is on, switch it off and then turn on again, then the bongos may start to sound.)
