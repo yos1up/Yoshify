@@ -1,7 +1,7 @@
 {
     "name": "Yoshify",
     "short_name": "Yoshify",
-    "description" : "Call Yoshi from anywhere",
+    "description" : "Ride Yoshi whenever you want",
     "version": "0.0.1",
     "manifest_version": 2,
     "icons": {
@@ -18,7 +18,8 @@
     ],
     "web_accessible_resources": [
        "sounds/*.wav",
-       "src/my-processor.js"
+       "src/recordingAudioWorklet.js",
+       "src/analysisWorker.js"
     ],
     "background": {
         "scripts": ["src/background.js"],
