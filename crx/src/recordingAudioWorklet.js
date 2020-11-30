@@ -32,9 +32,8 @@ class MyProcessor extends AudioWorkletProcessor {
         }
         return true
     }
- 
 }
-registerProcessor('my-processor', MyProcessor);
+registerProcessor('recordingAudioWorklet', MyProcessor);
 
 
 class RingBuffer{
