@@ -12,7 +12,7 @@
     },
     "content_scripts": [
         {
-            "matches": ["https://www.youtube.com/*"],
+            "matches": ["https://www.youtube.com/*", "https://www.nicovideo.jp/*"],
             "js": ["src/main.js"]
         }
     ],
