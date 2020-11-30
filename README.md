@@ -10,18 +10,24 @@ https://twitter.com/yos1up/status/1330063716956647424?s=20
 ## これはなに (About)
 
 「スーパーマリオシリーズでマリオがヨッシーに乗ると BGM の裏で鳴り始めるボンゴパート」をワンクリックで好きな曲に追加できる Chrome 拡張です．
-(When turned on, it attempts to play Yoshi bongos in sync with the music in your browser. At the moment it works best with music that has a regular beat, such as EDM music.)
+(The Chrome extension "Yoshify" allows you to add Yoshi's drums (bongos), which start playing when Mario rides Yoshi in the Super Mario series, to any music on YouTube. When turned on, it attempts to play Yoshi bongos in sync with the music in your browser. At the moment it works best with music that has a regular beat, such as EDM music.)
 
 ## インストール方法 (Installation)
 Yoshify は「パッケージ化されていないChrome拡張」として提供されています． お手元のChromeには，例えば[この手順](http://reviews.f-tools.net/Add-On/Jisaku-Tuika.html)でインストールできます． (This "Yoshify" is provided as an unpacked Chrome extension. You can install it into your Chrome [like this way](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/).)
 
 ## 注意 (Caution)
 
-- このChrome拡張が動作するのは， YouTube の動画視聴ページ （URL が https://www.youtube.com/ で始まるページ，例えば https://www.youtube.com/watch?v=1JqWCeE-MTM ）でのみです．他の動画サイトでは動作しません． (This Chrome extension works on YouTube pages only, whose URL starts with https://www.youtube.com/ (e.g. https://www.youtube.com/watch?v=1JqWCeE-MTM ).)
+- このChrome拡張は， 以下のページで動作します． (This Chrome extension works on the following web pages.)
 
-- BPMや拍タイミングの推定精度はそれほど高くありません．低音のビートが規則的に鳴っている曲だと成功しやすいですが，そうでない曲だと全く合わないこともあります．ご了承ください．
+    - YouTube の動画視聴ページ （URL が https://www.youtube.com/ で始まる） (YouTube video pages, whose URL starts with https://www.youtube.com/ )
+    
+    - ニコニコ動画の動画視聴ページ （URL が https://nicovideo.jp/ で始まる） (niconico video pages, whose URL starts with https://nicovideo.jp/ )
+    
+例えば https://www.youtube.com/watch?v=1JqWCeE-MTM で動作します． (For example, it works on https://www.youtube.com/watch?v=1JqWCeE-MTM )
 
-- macOS Catalina の最新版の Google Chrome で動作確認しております． また Windows 10 の最新版の Google Chrome でも動作を確認済みです．（他の環境でもある程度は動作すると思いますが，確認はしておりません．ご了承ください．）
+- BPMや拍タイミングの推定精度はそれほど高くありません．低音のビートが規則的に鳴っている曲だと成功しやすいですが，そうでない曲だと全く合わないこともあります．ご了承ください． (The estimation of BPM and beat timing is not very accurate. If the music has a regular bass beat, it seems to work well, but if it doesn't, it may fail completely.)
+
+- macOS Catalina の最新版の Google Chrome で動作確認しております． また Windows 10 の最新版の Google Chrome でも動作を確認済みです． (Verified on the latest version of Google Chrome  in macOS Catalina and Windows 10.)
 
 ## うまく動かないときは (Troubleshooting)
 
