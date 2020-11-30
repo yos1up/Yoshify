@@ -25,7 +25,7 @@ Yoshify は「パッケージ化されていないChrome拡張」として提供
     
 例えば https://www.youtube.com/watch?v=1JqWCeE-MTM で動作します． (For example, it works on https://www.youtube.com/watch?v=1JqWCeE-MTM )
 
-- BPMや拍タイミングの推定精度はそれほど高くありません．低音のビートが規則的に鳴っている曲だと成功しやすいですが，そうでない曲だと全く合わないこともあります．ご了承ください． (The estimation of BPM and beat timing is not very accurate. If the music has a regular bass beat, it seems to work well, but if it doesn't, it may fail completely.)
+- BPMや拍タイミングの推定精度はそれほど高くありません．低音のビートが規則的に鳴っている曲だと成功しやすいですが，そうでない曲だと全く合わないこともあります．ご了承ください． (The estimation of BPM and beat timing is not very accurate. If the music has a regular bass beat, it's likely to work well, but if it doesn't, it may fail completely.)
 
 - macOS Catalina の最新版の Google Chrome で動作確認しております． また Windows 10 の最新版の Google Chrome でも動作を確認済みです． (Verified on the latest version of Google Chrome  in macOS Catalina and Windows 10.)
 
